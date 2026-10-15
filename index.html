@@ -113,6 +113,14 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
 .porque{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:12px 14px}
 .porque h3{font-size:17px;margin-bottom:6px}
 .porque ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:14px}
+.preco .pval{display:grid;gap:2px;margin-bottom:10px}
+.preco .big{font:800 34px var(--display);font-stretch:85%;color:var(--good);font-variant-numeric:tabular-nums;line-height:1}
+.preco .sub2{font-size:13px;color:var(--muted)}
+.pgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.pgrid div{background:var(--sunk);border-radius:8px;padding:8px 10px;display:grid;gap:1px}
+.pgrid .k{font-size:12px;color:var(--muted)}
+.preco .arg,.preco .dica{margin:10px 0 0;font-size:14px}
+.preco .dica{color:var(--muted);font-size:13px}
 .msg{white-space:pre-wrap;background:var(--sunk);border-radius:9px;padding:12px;font-size:14px}
 .pactions{display:flex;flex-wrap:wrap;gap:8px}
 .foot{display:grid;gap:6px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
@@ -163,6 +171,7 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
   <footer class="foot">
     <span><b>Fonte:</b> Google Maps (Places API), lido pelo radar. Posição = ordem em que o Google mostra a empresa na busca "segmento em São Luís MA"; o que cada pessoa vê pode variar com a localização dela.</span>
     <span><b>Índice de oportunidade (0 a 100):</b> soma pontos para quem não tem site próprio, tem boa nota, muitas avaliações, atua em segmento de ticket alto, tem celular para contato e não está entre os primeiros do Google.</span>
+    <span><b>Quanto cobrar:</b> faixa de preço por segmento, pensada para São Luís, ajustada pelo tamanho da empresa (avaliações) e pela nota. Os valores são uma referência para negociar, não uma tabela fixa.</span>
     <span>Dados públicos das empresas no Google. Use para prospecção com bom senso: uma mensagem por empresa, sem insistência.</span>
   </footer>
 </div>
@@ -194,6 +203,32 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
     return Math.min(100, s);
   }
   const nivel = s => s >= 70 ? "q" : s >= 55 ? "b" : "";
+  const R$ = v => "R$ " + Math.round(v).toLocaleString("pt-BR");
+  // Preço sugerido: faixa do segmento (ticket do cliente final), ajustada pelo porte (avaliações) e pelo que a empresa já tem.
+  const TAB = {
+    dentista: { min: 1800, max: 2500, men: 99, plano: "Site de clínica", inclui: ["Página por tratamento (implante, ortodontia, clareamento…)", "Equipe e estrutura com fotos", "Botão de WhatsApp para agendar", "Mapa, horário e avaliações do Google", "Configuração para aparecer na busca local"], ancora: "Um único implante ou tratamento ortodôntico já paga o site inteiro." },
+    estetica: { min: 1500, max: 2200, men: 89, plano: "Site de clínica de estética", inclui: ["Página por procedimento com antes e depois", "Botão de WhatsApp para agendar avaliação", "Profissionais e certificações", "Mapa, horário e avaliações do Google", "Configuração para aparecer na busca local"], ancora: "Dois ou três procedimentos de harmonização pagam o site." },
+    pousada: { min: 1800, max: 3000, men: 119, plano: "Site com reservas diretas", inclui: ["Galeria de quartos e da estrutura", "Pedido de reserva direto pelo WhatsApp ou formulário", "Como chegar e passeios da região", "Versão em inglês (opcional)", "Avaliações do Google na página"], ancora: "Cada reserva direta economiza de 15 a 20% de comissão que iria para o Booking ou o Airbnb." },
+    solar: { min: 1800, max: 2800, men: 99, plano: "Site de captação de orçamentos", inclui: ["Simulador simples de economia na conta de luz", "Projetos entregues com fotos", "Formulário de orçamento direto no WhatsApp", "Página de financiamento", "Configuração para aparecer na busca local"], ancora: "Um único projeto fechado paga o site muitas vezes." },
+    casa: { min: 1000, max: 1600, men: 69, plano: "Site de serviços", inclui: ["Página por serviço com fotos de trabalhos", "Botão de orçamento pelo WhatsApp", "Bairros atendidos", "Avaliações do Google na página", "Configuração para aparecer na busca local"], ancora: "Dois ou três orçamentos fechados pagam o site." },
+    oficina: { min: 700, max: 1200, men: 59, plano: "Site de oficina", inclui: ["Serviços e marcas atendidas", "Botão de orçamento pelo WhatsApp", "Fotos da oficina e da equipe", "Mapa, horário e avaliações do Google"], ancora: "Uma revisão completa ou dois serviços pagam o site." }
+  };
+  function preco(x) {
+    if (x.site_tipo === "governo") return null;
+    const t = x.segmento === "servicos_casa" ? (/solar/i.test(x.termo || "") ? TAB.solar : TAB.casa) : TAB[x.segmento] || TAB.casa;
+    const a = +x.avaliacoes || 0, r = +x.rating || 0;
+    let f = 1, porte = "médio";
+    if (a >= 300) { f = 1.25; porte = "grande"; } else if (a >= 100) { f = 1.1; porte = "médio-grande"; } else if (a < 30) { f = 0.75; porte = "pequeno"; }
+    if (r >= 4.7 && a >= 50) f += 0.05;
+    const arred = v => Math.round(v / 50) * 50;
+    const min = arred(t.min * f), max = arred(t.max * f), alvo = arred((min + max) / 2);
+    const men = Math.round(t.men * (f >= 1.2 ? 1.2 : 1) / 10) * 10 - 1;
+    const semEntrada = Math.round(((alvo / 12) + men) * 1.1 / 10) * 10 - 1;
+    const plano = a < 30 ? "Página única (essencial)" : a >= 300 ? t.plano + " (completo)" : t.plano;
+    const inclui = a < 30 ? t.inclui.slice(0, 3) : t.inclui;
+    const reforma = x.site_tipo === "proprio";
+    return { min, max, alvo, men, semEntrada, plano, inclui, ancora: t.ancora, porte, reforma };
+  }
 
   function filtrados() {
     const b = $("fBusca").value.trim().toLowerCase(), fs = $("fSite").value, nota = +$("fNota").value, av = +$("fAval").value, ba = $("fBairro").value, cel = $("fCel").checked;
@@ -206,8 +241,9 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
   function kpis() {
     const base = ALL.filter(x => !seg || x.segmento === seg);
     const sem = base.filter(semProprio).length, quentes = base.filter(x => x._s >= 70).length;
-    const media = base.length ? Math.round(base.reduce((s, x) => s + (+x.avaliacoes || 0), 0) / base.length) : 0;
-    $("kpis").innerHTML = [[n(base.length), "empresas no radar", ""], [base.length ? Math.round(sem / base.length * 100) + "%" : "–", "sem site próprio", ""], [n(quentes), "leads quentes (índice 70+)", "hot"], [n(media), "avaliações em média por empresa", ""]]
+    const pot = base.filter(x => x._s >= 70).reduce((s, x) => { const p = preco(x); return s + (p ? p.alvo : 0); }, 0);
+    const potTxt = pot >= 1e6 ? "R$ " + (pot / 1e6).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + " mi" : "R$ " + Math.round(pot / 1000).toLocaleString("pt-BR") + " mil";
+    $("kpis").innerHTML = [[n(base.length), "empresas no radar", ""], [base.length ? Math.round(sem / base.length * 100) + "%" : "–", "sem site próprio", ""], [n(quentes), "leads quentes (índice 70+)", "hot"], [potTxt, "em sites, se fechar todos os leads quentes", ""]]
       .map(([v, l, c]) => `<div class="kpi ${c}"><span class="v">${v}</span><span class="l">${l}</span></div>`).join("");
   }
   function segs() {
@@ -272,6 +308,12 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
         <div class="fact"><span class="k">Bairro</span><span class="v">${esc(x.bairro || "–")}</span></div>
       </div>
       <div class="porque"><h3>Por que é uma oportunidade</h3><ul>${motivos(x).map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>
+      ${(p => !p ? "" : `<div class="porque preco"><h3>Quanto cobrar</h3>
+        <div class="pval"><span class="big">${R$(p.alvo)}</span><span class="sub2">faixa ${R$(p.min)} a ${R$(p.max)} · ${esc(p.plano)}</span></div>
+        <div class="pgrid"><div><span class="k">Manutenção</span><b>${R$(p.men)}/mês</b><span class="k">hospedagem, domínio, ajustes</span></div><div><span class="k">Ou sem entrada</span><b>${R$(p.semEntrada)}/mês</b><span class="k">contrato de 12 meses</span></div></div>
+        <ul>${p.inclui.map(i => `<li>${esc(i)}</li>`).join("")}</ul>
+        <p class="arg"><b>Argumento:</b> ${esc(p.ancora)}${p.reforma ? " Como já tem site, ofereça uma reforma: cobre perto do mínimo da faixa." : ""} Empresa de porte ${p.porte} (${n(x.avaliacoes)} avaliações).</p>
+        <p class="dica">Não fale de preço na primeira mensagem: mostre um modelo pronto e leve o valor para a conversa.</p></div>`)(preco(x))}
       <div class="pactions">${x.maps_url ? `<a class="btn" href="${esc(x.maps_url)}" target="_blank" rel="noopener">Ver no Google Maps</a>` : ""}${x.site ? `<a class="btn" href="${esc(x.site)}" target="_blank" rel="noopener">Abrir o link do site</a>` : ""}${x.instagram && x.site_tipo !== "instagram" ? `<a class="btn" href="${esc(x.instagram)}" target="_blank" rel="noopener">Instagram</a>` : ""}</div>
       <div class="porque"><h3>Mensagem de abordagem</h3><div class="msg" id="msgTxt">${esc(msg)}</div></div>
       <div class="pactions">${x.telefone ? `<a class="btn zap" href="https://wa.me/${tel}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Abrir no WhatsApp</a>` : ""}<button class="btn" type="button" id="cp">Copiar mensagem</button></div>
