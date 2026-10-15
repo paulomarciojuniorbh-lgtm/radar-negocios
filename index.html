@@ -172,7 +172,7 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
       <div class="f"><label for="fBusca">Buscar</label><input id="fBusca" type="search" placeholder="Nome ou bairro"></div>
       <div class="f"><label for="fSite">Site</label><select id="fSite">
         <option value="">Qualquer situação</option><option value="semproprio" selected>Sem site próprio</option><option value="nenhum">Nenhum link</option>
-        <option value="social">Só Instagram, WhatsApp ou Facebook</option><option value="fora">Site fora do ar</option><option value="proprio">Com site próprio</option></select></div>
+        <option value="social">Só Instagram, WhatsApp ou Facebook</option><option value="fora">Site fora do ar</option><option value="quebrado">Link do Google quebrado</option><option value="proprio">Com site próprio</option></select></div>
       <div class="f"><label for="fNota">Nota mínima</label><select id="fNota"><option value="0">Qualquer</option><option value="4">4,0 ou mais</option><option value="4.5">4,5 ou mais</option><option value="4.8">4,8 ou mais</option></select></div>
       <div class="f"><label for="fAval">Avaliações mínimas</label><select id="fAval"><option value="0">Qualquer</option><option value="10">10 ou mais</option><option value="50" selected>50 ou mais</option><option value="150">150 ou mais</option></select></div>
       <div class="f"><label for="fBairro">Bairro</label><select id="fBairro"></select></div>
@@ -255,7 +255,7 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
     const ab = $("fAbord").value, b = $("fBusca").value.trim().toLowerCase(), fs = $("fSite").value, nota = +$("fNota").value, av = +$("fAval").value, ba = $("fBairro").value, cel = $("fCel").checked;
     const r = ALL.filter(x => (!seg || x.segmento === seg) &&
       (!ab || (ab === "nao" ? !x.ab_status : ab === "andamento" ? ["chamei", "respondeu", "negociando"].includes(x.ab_status) : x.ab_status === ab)) && (!b || (x.nome + " " + (x.bairro || "")).toLowerCase().includes(b)) &&
-      (!fs || (fs === "semproprio" ? semProprio(x) : fs === "social" ? SOCIAL.includes(x.site_tipo) : fs === "nenhum" ? x.site_tipo === "nenhum" : fs === "fora" ? x.site_tipo === "fora_do_ar" : x.site_tipo === "proprio")) &&
+      (!fs || (fs === "semproprio" ? semProprio(x) : fs === "social" ? SOCIAL.includes(x.site_tipo) : fs === "nenhum" ? x.site_tipo === "nenhum" : fs === "fora" ? x.site_tipo === "fora_do_ar" : fs === "quebrado" ? x.site_check === "link_quebrado" : x.site_tipo === "proprio")) &&
       (+x.rating || 0) >= nota && (+x.avaliacoes || 0) >= av && (!ba || x.bairro === ba) && (!cel || celular(x.telefone)));
     const by = { score: (a, c) => c._s - a._s || c.avaliacoes - a.avaliacoes, aval: (a, c) => c.avaliacoes - a.avaliacoes, nota: (a, c) => (c.rating || 0) - (a.rating || 0) || c.avaliacoes - a.avaliacoes, pos: (a, c) => (a.pos_cidade || 999) - (c.pos_cidade || 999), recente: (a, c) => String(c.ab_em || "").localeCompare(String(a.ab_em || "")) }[$("sort").value];
     return r.sort(by);
@@ -294,7 +294,7 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
       return `<button type="button" class="row" data-id="${esc(x.place_id)}"><span class="score ${nivel(x._s)}" title="Índice de oportunidade">${x._s}</span>
         <span class="rinfo"><span class="rtitle">${esc(x.nome)}</span>
         <span class="rmeta"><span class="estrela">★ ${x.rating ? x.rating.toLocaleString("pt-BR") : "–"}</span><span>${n(x.avaliacoes)} avaliações</span><span>${esc(x.bairro || "")}</span>${x.pos_cidade ? `<span>${x.pos_cidade}º no Google</span>` : ""}</span>
-        <span class="chips">${x.ab_status ? `<span class="chip st-${x.ab_status}">${ST[x.ab_status]}</span>` : ""}<span class="chip ${st[1]}">${st[0]}</span>${x.instagram ? '<span class="chip acc">Tem Instagram</span>' : ""}<span class="chip">${esc((SEG[x.segmento] || [x.segmento])[0])}</span></span></span></button>`;
+        <span class="chips">${x.site_check === "link_quebrado" ? '<span class="chip mid">Link do Google quebrado</span>' : ""}${x.ab_status ? `<span class="chip st-${x.ab_status}">${ST[x.ab_status]}</span>` : ""}<span class="chip ${st[1]}">${st[0]}</span>${x.instagram ? '<span class="chip acc">Tem Instagram</span>' : ""}<span class="chip">${esc((SEG[x.segmento] || [x.segmento])[0])}</span></span></span></button>`;
     }).join("") : `<div class="empty">Nenhuma empresa com esses filtros.</div>`;
     $("more").hidden = r.length <= shown;
   }
@@ -309,7 +309,8 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
     if ((+x.avaliacoes || 0) >= 80) m.push(`Tem movimento: ${n(x.avaliacoes)} avaliações no Google.`);
     if (x.pos_cidade > 10) m.push(`Aparece em ${x.pos_cidade}º na busca geral da cidade: há espaço para subir.`);
     if (x.site_tipo === "rede") m.push("Faz parte de uma rede ou franquia (o mesmo site serve várias unidades): quem decide sobre site é a rede, não a unidade.");
-    if (x.site_tipo === "proprio") m.push("Já tem site próprio: oportunidade menor (dá para oferecer melhoria ou anúncio).");
+    if (x.site_tipo === "proprio" && x.site_check === "link_quebrado") m.push("O site funciona, mas o link cadastrado no Google leva a uma página que não existe (erro 404). Quem clica no Google cai num erro: é um conserto rápido para oferecer e abrir a conversa.");
+    else if (x.site_tipo === "proprio") m.push("Já tem site próprio: oportunidade menor (dá para oferecer melhoria ou anúncio).");
     return m;
   }
   function mensagem(x) {
