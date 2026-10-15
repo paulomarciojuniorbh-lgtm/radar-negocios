@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Radar Negócios Locais</title>
+<meta name="description" content="Empresas de São Luís no Google: nota, avaliações, posição, site e Instagram, com os melhores leads para oferecer um site.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: mesmo padrão dos radares — topo, resumo em números, abas de segmento, filtros à esquerda e lista à direita; ficha da empresa em painel lateral (tela cheia no celular) */
+:root{
+  --bg:#F3F4F2; --surface:#FFFFFF; --sunk:#E9EBE7; --ink:#191B1A; --muted:#5F6461; --line:#D9DCD7;
+  --accent:#0F6E64; --accent-ink:#FFFFFF; --accent-soft:#DCEFEC;
+  --hot:#B4410F; --hot-soft:#F9E3D8; --good:#16794F; --good-soft:#DDF1E7; --mid:#A86B00; --mid-soft:#FBEFD6; --low:#6B7672; --low-soft:#E6EAE8;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:10px; color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121514; --surface:#1A1E1D; --sunk:#222826; --ink:#E9ECEA; --muted:#A1A8A4; --line:#313835;
+  --accent:#4FC2B3; --accent-ink:#0B1A18; --accent-soft:#14302C;
+  --hot:#F29A6B; --hot-soft:#3A2116; --good:#5DD39E; --good-soft:#143428; --mid:#F2B84B; --mid-soft:#3A2D12; --low:#94A49F; --low-soft:#232E2B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121514; --surface:#1A1E1D; --sunk:#222826; --ink:#E9ECEA; --muted:#A1A8A4; --line:#313835;
+  --accent:#4FC2B3; --accent-ink:#0B1A18; --accent-soft:#14302C;
+  --hot:#F29A6B; --hot-soft:#3A2116; --good:#5DD39E; --good-soft:#143428; --mid:#F2B84B; --mid-soft:#3A2D12; --low:#94A49F; --low-soft:#232E2B; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:1240px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
+.brand{display:grid;gap:4px;max-width:760px}
+.brand h1{font-size:clamp(30px,6vw,44px);line-height:1}
+.brand p{margin:0;color:var(--muted)}
+.cidade{display:flex;gap:8px;align-items:center;font-weight:600}
+.cidade select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 10px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.kpi{padding:14px 16px;display:grid;gap:2px;border-left:1px solid var(--line)}
+.kpi:first-child{border-left:0}
+.kpi .v{font:800 30px var(--display);font-stretch:85%;font-variant-numeric:tabular-nums;line-height:1.05}
+.kpi .l{font-size:13px;color:var(--muted)}
+.kpi.hot .v{color:var(--hot)}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi:nth-child(3){border-left:0}.kpi:nth-child(n+3){border-top:1px solid var(--line)}}
+.segs{display:flex;gap:6px;flex-wrap:wrap}
+.segs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:500;font-size:14px;cursor:pointer}
+.segs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.segs button span{font-family:var(--mono);font-size:12px;opacity:.75;margin-left:4px}
+.painel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.painel{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:10px;align-content:start}
+.card h2{font-size:20px}
+.card .sub{font-size:13px;color:var(--muted);margin:0}
+.barras{display:grid;gap:8px}
+.barra{display:grid;grid-template-columns:150px minmax(0,1fr) 54px;gap:10px;align-items:center;font-size:14px}
+@media (max-width:520px){.barra{grid-template-columns:110px minmax(0,1fr) 46px}}
+.trilho{height:12px;background:var(--sunk);border-radius:6px;overflow:hidden;display:flex}
+.trilho i{display:block;height:100%}
+.barra .v{font-family:var(--mono);font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.legenda{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.legenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.main{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.main{grid-template-columns:minmax(0,1fr)}}
+.filters{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;gap:12px;position:sticky;top:12px}
+@media (max-width:860px){.filters{position:static}}
+.f{display:grid;gap:4px}
+.f label{font-size:12px;font-weight:600;color:var(--muted)}
+.f select,.f input{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;min-height:40px;width:100%}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.reset{background:none;border:0;color:var(--accent);text-decoration:underline;cursor:pointer;justify-self:start;padding:0}
+.listhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.listhead h2{font-size:22px;display:inline}
+.count{color:var(--muted);font-size:14px;margin-left:6px}
+.sort{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.sort select{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px}
+.rows{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;cursor:pointer}
+.row:hover{border-color:color-mix(in srgb,var(--ink) 30%,var(--line))}
+.score{width:54px;height:54px;border-radius:12px;display:grid;place-items:center;background:var(--sunk);font:800 22px var(--display);font-stretch:85%;font-variant-numeric:tabular-nums}
+.score.q{background:var(--hot-soft);color:var(--hot)}
+.score.b{background:var(--mid-soft);color:var(--mid)}
+.rinfo{display:grid;gap:3px;min-width:0}
+.rtitle{font-weight:600;font-size:16px;overflow-wrap:anywhere}
+.rmeta{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:2px 10px}
+.estrela{color:var(--mid);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.chip{font-size:12px;font-weight:600;border-radius:999px;padding:2px 9px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.chip.hot{background:var(--hot-soft);color:var(--hot)}
+.chip.ok{background:var(--good-soft);color:var(--good)}
+.chip.mid{background:var(--mid-soft);color:var(--mid)}
+.chip.acc{background:var(--accent-soft);color:var(--accent)}
+.more{justify-self:center;margin-top:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink);font-size:14px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.zap{background:#1F8A4C;border-color:#1F8A4C;color:#fff}
+.empty,.notice{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:16px;color:var(--muted);text-align:center}
+#detail{position:fixed;inset:0;z-index:20}
+.scrim{position:absolute;inset:0;background:rgba(10,14,13,.45)}
+.panel{position:absolute;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--bg);overflow:auto;padding-block:18px 28px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));display:grid;gap:14px;align-content:start}
+.ptop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ptop h2{font-size:26px}
+.close{width:38px;height:38px;flex:none;border-radius:9px;border:1px solid var(--line);background:var(--surface);font-size:22px;cursor:pointer}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:10px 12px;display:grid;gap:2px;min-width:0}
+.fact .k{font-size:12px;color:var(--muted)}
+.fact .v{font-weight:600;overflow-wrap:anywhere}
+.porque{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:12px 14px}
+.porque h3{font-size:17px;margin-bottom:6px}
+.porque ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:14px}
+.msg{white-space:pre-wrap;background:var(--sunk);border-radius:9px;padding:12px;font-size:14px}
+.pactions{display:flex;flex-wrap:wrap;gap:8px}
+.foot{display:grid;gap:6px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:9px;font-weight:600;z-index:30}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Negócios locais no Google · prospecção de sites</span>
+      <h1>Radar Negócios Locais</h1>
+      <p>Empresas que aparecem no Google Maps, com nota, avaliações, posição na busca, site e Instagram. O radar aponta quem tem clientes e boa reputação, mas ainda não tem um site próprio.</p>
+    </div>
+    <label class="cidade" for="fCidade">Cidade <select id="fCidade"></select></label>
+  </header>
+
+  <div id="msg"></div>
+  <section class="kpis" id="kpis" aria-label="Resumo"></section>
+  <nav class="segs" id="segs" aria-label="Segmentos"></nav>
+
+  <section class="painel">
+    <div class="card"><h2>Quem tem site próprio</h2><p class="sub">Para onde aponta o link do site no perfil do Google, por segmento.</p><div class="barras" id="barSite"></div>
+      <div class="legenda"><span><i style="background:var(--good)"></i>Site próprio</span><span><i style="background:var(--mid)"></i>Só Instagram, WhatsApp ou Facebook</span><span><i style="background:var(--hot)"></i>Nenhum link</span><span><i style="background:var(--low)"></i>Plataforma ou fora do ar</span></div></div>
+    <div class="card"><h2>Bairros com mais leads quentes</h2><p class="sub">Empresas com 60 pontos ou mais no índice de oportunidade.</p><div class="barras" id="barBairro"></div></div>
+  </section>
+
+  <div class="main">
+    <aside class="filters" aria-label="Filtros">
+      <div class="f"><label for="fBusca">Buscar</label><input id="fBusca" type="search" placeholder="Nome ou bairro"></div>
+      <div class="f"><label for="fSite">Site</label><select id="fSite">
+        <option value="">Qualquer situação</option><option value="semproprio" selected>Sem site próprio</option><option value="nenhum">Nenhum link</option>
+        <option value="social">Só Instagram, WhatsApp ou Facebook</option><option value="proprio">Com site próprio</option></select></div>
+      <div class="f"><label for="fNota">Nota mínima</label><select id="fNota"><option value="0">Qualquer</option><option value="4">4,0 ou mais</option><option value="4.5">4,5 ou mais</option><option value="4.8">4,8 ou mais</option></select></div>
+      <div class="f"><label for="fAval">Avaliações mínimas</label><select id="fAval"><option value="0">Qualquer</option><option value="10">10 ou mais</option><option value="50" selected>50 ou mais</option><option value="150">150 ou mais</option></select></div>
+      <div class="f"><label for="fBairro">Bairro</label><select id="fBairro"></select></div>
+      <label class="check"><input type="checkbox" id="fCel" checked> Só com celular (dá para chamar no WhatsApp)</label>
+      <button class="reset" id="reset" type="button">Limpar filtros</button>
+    </aside>
+    <section aria-label="Empresas">
+      <div class="listhead"><div><h2>Empresas</h2><span class="count" id="count"></span></div>
+        <label class="sort" for="sort">Ordenar por <select id="sort"><option value="score">Oportunidade</option><option value="aval">Mais avaliações</option><option value="nota">Melhor nota</option><option value="pos">Posição no Google</option></select></label></div>
+      <div class="rows" id="rows"></div>
+      <button class="btn more" id="more" type="button" hidden>Mostrar mais</button>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <span><b>Fonte:</b> Google Maps (Places API), lido pelo radar. Posição = ordem em que o Google mostra a empresa na busca "segmento em São Luís MA"; o que cada pessoa vê pode variar com a localização dela.</span>
+    <span><b>Índice de oportunidade (0 a 100):</b> soma pontos para quem não tem site próprio, tem boa nota, muitas avaliações, atua em segmento de ticket alto, tem celular para contato e não está entre os primeiros do Google.</span>
+    <span>Dados públicos das empresas no Google. Use para prospecção com bom senso: uma mensagem por empresa, sem insistência.</span>
+  </footer>
+</div>
+<div id="detail" hidden></div>
+<div class="toast" id="toast" hidden></div>
+<script>
+(function () {
+  const API = "https://ryhyvzwqtktaaonznizn.supabase.co/rest/v1/neg_lugares?select=place_id,cidade,segmento,termo,nome,tipo_nome,rating,avaliacoes,site,site_tipo,instagram,telefone,endereco,bairro,maps_url,status,pos_cidade,visto_em&status=eq.OPERATIONAL&order=avaliacoes.desc";
+  const KEY = "sb_publishable_Ji31DC1ihqZTR7gmLeYTLw_GHgBjWN0";
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const n = v => (+v || 0).toLocaleString("pt-BR");
+  const SEG = { dentista: ["Dentistas", "clínica odontológica", 10], estetica: ["Estética", "clínica de estética", 10], pousada: ["Pousadas e hotéis", "pousada", 10], servicos_casa: ["Serviços para casa", "empresa", 9], oficina: ["Oficinas", "oficina", 6] };
+  const SITE = { proprio: ["Site próprio", "ok"], instagram: ["Só Instagram", "hot"], whatsapp: ["Só WhatsApp", "hot"], facebook: ["Só Facebook", "hot"], link_bio: ["Link de bio", "hot"], nenhum: ["Sem site", "hot"], plataforma: ["Plataforma de terceiros", "mid"], delivery: ["App de delivery", "mid"], fora_do_ar: ["Site fora do ar", "hot"], governo: ["Órgão público", ""] };
+  const SOCIAL = ["instagram", "whatsapp", "facebook", "link_bio"];
+  const semProprio = x => x.site_tipo !== "proprio" && x.site_tipo !== "governo";
+  const celular = t => { const d = String(t || "").replace(/\D/g, ""); return d.length === 11 && d[2] === "9"; };
+  let ALL = [], seg = "", shown = 40;
+
+  function score(x) {
+    if (x.site_tipo === "governo") return 0;
+    let s = 0;
+    s += { nenhum: 35, instagram: 40, whatsapp: 40, facebook: 38, link_bio: 38, fora_do_ar: 38, plataforma: 22, delivery: 18, proprio: 0 }[x.site_tipo] ?? 20;
+    const r = +x.rating || 0; s += r >= 4.7 ? 15 : r >= 4.3 ? 10 : r >= 4 ? 5 : 0;
+    const a = +x.avaliacoes || 0; s += a >= 200 ? 20 : a >= 80 ? 15 : a >= 30 ? 10 : a >= 10 ? 5 : 0;
+    s += (SEG[x.segmento] || [, , 5])[2];
+    if (celular(x.telefone)) s += 5;
+    if (!x.pos_cidade || x.pos_cidade > 10) s += 5;
+    return Math.min(100, s);
+  }
+  const nivel = s => s >= 70 ? "q" : s >= 55 ? "b" : "";
+
+  function filtrados() {
+    const b = $("fBusca").value.trim().toLowerCase(), fs = $("fSite").value, nota = +$("fNota").value, av = +$("fAval").value, ba = $("fBairro").value, cel = $("fCel").checked;
+    const r = ALL.filter(x => (!seg || x.segmento === seg) && (!b || (x.nome + " " + (x.bairro || "")).toLowerCase().includes(b)) &&
+      (!fs || (fs === "semproprio" ? semProprio(x) : fs === "social" ? SOCIAL.includes(x.site_tipo) : fs === "nenhum" ? x.site_tipo === "nenhum" : x.site_tipo === "proprio")) &&
+      (+x.rating || 0) >= nota && (+x.avaliacoes || 0) >= av && (!ba || x.bairro === ba) && (!cel || celular(x.telefone)));
+    const by = { score: (a, c) => c._s - a._s || c.avaliacoes - a.avaliacoes, aval: (a, c) => c.avaliacoes - a.avaliacoes, nota: (a, c) => (c.rating || 0) - (a.rating || 0) || c.avaliacoes - a.avaliacoes, pos: (a, c) => (a.pos_cidade || 999) - (c.pos_cidade || 999) }[$("sort").value];
+    return r.sort(by);
+  }
+  function kpis() {
+    const base = ALL.filter(x => !seg || x.segmento === seg);
+    const sem = base.filter(semProprio).length, quentes = base.filter(x => x._s >= 70).length;
+    const media = base.length ? Math.round(base.reduce((s, x) => s + (+x.avaliacoes || 0), 0) / base.length) : 0;
+    $("kpis").innerHTML = [[n(base.length), "empresas no radar", ""], [base.length ? Math.round(sem / base.length * 100) + "%" : "–", "sem site próprio", ""], [n(quentes), "leads quentes (índice 70+)", "hot"], [n(media), "avaliações em média por empresa", ""]]
+      .map(([v, l, c]) => `<div class="kpi ${c}"><span class="v">${v}</span><span class="l">${l}</span></div>`).join("");
+  }
+  function segs() {
+    const c = k => ALL.filter(x => x.segmento === k).length;
+    $("segs").innerHTML = `<button type="button" data-seg="" aria-pressed="${!seg}">Todos<span>${n(ALL.length)}</span></button>` + Object.entries(SEG).filter(([k]) => c(k)).map(([k, [l]]) => `<button type="button" data-seg="${k}" aria-pressed="${seg === k}">${l}<span>${n(c(k))}</span></button>`).join("");
+  }
+  function graficos() {
+    const linhas = Object.entries(SEG).map(([k, [l]]) => {
+      const b = ALL.filter(x => x.segmento === k); if (!b.length) return "";
+      const p = f => b.filter(f).length / b.length * 100;
+      const pr = p(x => x.site_tipo === "proprio"), so = p(x => SOCIAL.includes(x.site_tipo)), ne = p(x => x.site_tipo === "nenhum"), ou = 100 - pr - so - ne;
+      return `<div class="barra"><span>${l}</span><div class="trilho" title="Site próprio ${Math.round(pr)}% · redes ${Math.round(so)}% · nenhum ${Math.round(ne)}%"><i style="width:${pr}%;background:var(--good)"></i><i style="width:${so}%;background:var(--mid)"></i><i style="width:${ne}%;background:var(--hot)"></i><i style="width:${ou}%;background:var(--low)"></i></div><span class="v">${Math.round(pr)}%</span></div>`;
+    }).join("");
+    $("barSite").innerHTML = linhas || `<p class="sub">Sem dados.</p>`;
+    const cont = {}; ALL.filter(x => (!seg || x.segmento === seg) && x._s >= 60 && x.bairro).forEach(x => cont[x.bairro] = (cont[x.bairro] || 0) + 1);
+    const top = Object.entries(cont).sort((a, b) => b[1] - a[1]).slice(0, 8), max = Math.max(1, ...top.map(t => t[1]));
+    $("barBairro").innerHTML = top.length ? top.map(([b, v]) => `<div class="barra"><span>${esc(b)}</span><div class="trilho"><i style="width:${v / max * 100}%;background:var(--hot)"></i></div><span class="v">${v}</span></div>`).join("") : `<p class="sub">Sem dados.</p>`;
+  }
+  function render() {
+    const r = filtrados();
+    $("count").textContent = `${n(r.length)} empresas`;
+    $("rows").innerHTML = r.length ? r.slice(0, shown).map(x => {
+      const st = SITE[x.site_tipo] || [x.site_tipo, ""];
+      return `<button type="button" class="row" data-id="${esc(x.place_id)}"><span class="score ${nivel(x._s)}" title="Índice de oportunidade">${x._s}</span>
+        <span class="rinfo"><span class="rtitle">${esc(x.nome)}</span>
+        <span class="rmeta"><span class="estrela">★ ${x.rating ? x.rating.toLocaleString("pt-BR") : "–"}</span><span>${n(x.avaliacoes)} avaliações</span><span>${esc(x.bairro || "")}</span>${x.pos_cidade ? `<span>${x.pos_cidade}º no Google</span>` : ""}</span>
+        <span class="chips"><span class="chip ${st[1]}">${st[0]}</span>${x.instagram ? '<span class="chip acc">Tem Instagram</span>' : ""}<span class="chip">${esc((SEG[x.segmento] || [x.segmento])[0])}</span></span></span></button>`;
+    }).join("") : `<div class="empty">Nenhuma empresa com esses filtros.</div>`;
+    $("more").hidden = r.length <= shown;
+  }
+  function tudo() { kpis(); segs(); graficos(); render(); }
+
+  function motivos(x) {
+    const m = [];
+    if (x.site_tipo === "nenhum") m.push("Não tem nenhum link de site no Google: quem acha a empresa não tem para onde ir além do telefone.");
+    if (SOCIAL.includes(x.site_tipo)) m.push(`O "site" no Google é ${({ instagram: "o Instagram", whatsapp: "um link de WhatsApp", facebook: "o Facebook", link_bio: "um link de bio" })[x.site_tipo]}: já quer presença online, mas sem página própria.`);
+    if (x.site_tipo === "fora_do_ar") m.push("O site cadastrado no Google está fora do ar.");
+    if ((+x.rating || 0) >= 4.5) m.push(`Reputação forte: nota ${x.rating.toLocaleString("pt-BR")}. Um site ajuda a converter quem já confia.`);
+    if ((+x.avaliacoes || 0) >= 80) m.push(`Tem movimento: ${n(x.avaliacoes)} avaliações no Google.`);
+    if (!x.pos_cidade || x.pos_cidade > 10) m.push(x.pos_cidade ? `Aparece em ${x.pos_cidade}º na busca da cidade: há espaço para subir.` : "Não aparece entre os 60 primeiros na busca geral da cidade.");
+    if (x.site_tipo === "proprio") m.push("Já tem site próprio: oportunidade menor (dá para oferecer melhoria ou anúncio).");
+    return m;
+  }
+  function mensagem(x) {
+    const nome = x.nome.split(/[|\-–]/)[0].trim();
+    const ondeVai = { instagram: "o link do Google leva para o Instagram", whatsapp: "o link do Google leva direto para o WhatsApp", facebook: "o link do Google leva para o Facebook", link_bio: "o link do Google leva para um link de bio", nenhum: "não aparece um site no perfil do Google", fora_do_ar: "o site que está no Google não está abrindo" }[x.site_tipo] || "dá para melhorar a presença de vocês no Google";
+    const seg = (SEG[x.segmento] || [, "empresa"])[1];
+    return `Olá! Tudo bem?\n\nVi a ${nome} no Google${x.rating ? ` — nota ${x.rating.toLocaleString("pt-BR")} com ${n(x.avaliacoes)} avaliações, parabéns!` : "."}\n\nReparei que ${ondeVai}. Eu crio sites para ${seg} aqui em ${x.cidade || "São Luís"}, pensados para aparecer no Google e levar o cliente direto para o WhatsApp de vocês.\n\nPosso te mostrar um modelo rapidinho, sem compromisso?`;
+  }
+  function abrir(x) {
+    const st = SITE[x.site_tipo] || [x.site_tipo, ""];
+    let tel = String(x.telefone || "").replace(/\D/g, ""); if (tel.length <= 11) tel = "55" + tel;
+    const msg = mensagem(x);
+    $("detail").innerHTML = `<div class="scrim" data-close="1"></div><aside class="panel" role="dialog" aria-modal="true" aria-labelledby="dT">
+      <div class="ptop"><div><span class="eyebrow">${esc((SEG[x.segmento] || [x.segmento])[0])} · ${esc(x.tipo_nome || "")}</span><h2 id="dT">${esc(x.nome)}</h2></div><button class="close" data-close="1" type="button" aria-label="Fechar">×</button></div>
+      <div class="facts">
+        <div class="fact"><span class="k">Índice de oportunidade</span><span class="v">${x._s} de 100</span></div>
+        <div class="fact"><span class="k">Nota no Google</span><span class="v">★ ${x.rating ? x.rating.toLocaleString("pt-BR") : "–"} · ${n(x.avaliacoes)} avaliações</span></div>
+        <div class="fact"><span class="k">Posição na busca da cidade</span><span class="v">${x.pos_cidade ? x.pos_cidade + "º" : "fora dos 60 primeiros"}</span></div>
+        <div class="fact"><span class="k">Site</span><span class="v">${st[0]}</span></div>
+        <div class="fact"><span class="k">Telefone</span><span class="v">${esc(x.telefone || "–")}</span></div>
+        <div class="fact"><span class="k">Bairro</span><span class="v">${esc(x.bairro || "–")}</span></div>
+      </div>
+      <div class="porque"><h3>Por que é uma oportunidade</h3><ul>${motivos(x).map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>
+      <div class="pactions">${x.maps_url ? `<a class="btn" href="${esc(x.maps_url)}" target="_blank" rel="noopener">Ver no Google Maps</a>` : ""}${x.site ? `<a class="btn" href="${esc(x.site)}" target="_blank" rel="noopener">Abrir o link do site</a>` : ""}${x.instagram && x.site_tipo !== "instagram" ? `<a class="btn" href="${esc(x.instagram)}" target="_blank" rel="noopener">Instagram</a>` : ""}</div>
+      <div class="porque"><h3>Mensagem de abordagem</h3><div class="msg" id="msgTxt">${esc(msg)}</div></div>
+      <div class="pactions">${x.telefone ? `<a class="btn zap" href="https://wa.me/${tel}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Abrir no WhatsApp</a>` : ""}<button class="btn" type="button" id="cp">Copiar mensagem</button></div>
+      <p class="sub" style="font-size:12.5px;color:var(--muted);margin:0">${esc(x.endereco || "")}</p></aside>`;
+    $("detail").hidden = false; $("detail").querySelector(".close").focus();
+    $("detail").onclick = e => { if (e.target.dataset.close) fechar(); };
+    $("cp").onclick = () => { try { navigator.clipboard.writeText(msg).then(() => toast("Mensagem copiada"), () => sel()); } catch (_) { sel(); } };
+  }
+  function sel() { const r = document.createRange(); r.selectNodeContents($("msgTxt")); getSelection().removeAllRanges(); getSelection().addRange(r); toast("Texto selecionado"); }
+  function fechar() { $("detail").hidden = true; $("detail").innerHTML = ""; }
+  function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2200); }
+
+  ["fBusca", "fSite", "fNota", "fAval", "fBairro", "fCel", "sort"].forEach(id => $(id).addEventListener("input", () => { shown = 40; render(); }));
+  $("reset").onclick = () => { $("fBusca").value = ""; $("fSite").value = ""; $("fNota").value = "0"; $("fAval").value = "0"; $("fBairro").value = ""; $("fCel").checked = false; render(); };
+  $("segs").onclick = e => { const b = e.target.closest("[data-seg]"); if (!b) return; seg = b.dataset.seg; shown = 40; tudo(); };
+  $("more").onclick = () => { shown += 40; render(); };
+  $("rows").onclick = e => { const b = e.target.closest(".row"); if (b) abrir(ALL.find(x => x.place_id === b.dataset.id)); };
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("detail").hidden) fechar(); });
+
+  async function carregar() {
+    const rows = [];
+    for (let off = 0; off < 20000; off += 1000) {
+      const r = await fetch(`${API}&limit=1000&offset=${off}`, { headers: { apikey: KEY } });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const p = await r.json(); rows.push(...p); if (p.length < 1000) break;
+    }
+    return rows;
+  }
+  $("msg").innerHTML = `<div class="notice">Carregando empresas…</div>`;
+  carregar().then(rows => {
+    ALL = rows.map(x => (x._s = score(x), x));
+    const cidades = [...new Set(ALL.map(x => x.cidade))]; $("fCidade").innerHTML = cidades.map(c => `<option>${esc(c)}</option>`).join("");
+    const bairros = [...new Set(ALL.map(x => x.bairro).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    $("fBairro").innerHTML = `<option value="">Todos os bairros</option>` + bairros.map(b => `<option>${esc(b)}</option>`).join("");
+    const ult = ALL.reduce((m, x) => x.visto_em > m ? x.visto_em : m, "");
+    $("msg").innerHTML = ult ? `<p class="sub" style="margin:0;color:var(--muted);font-size:13px">Dados do Google Maps lidos em ${new Date(ult).toLocaleDateString("pt-BR")}.</p>` : "";
+    tudo();
+  }).catch(e => { $("msg").innerHTML = `<div class="notice">Não foi possível carregar: ${esc(e.message)}</div>`; });
+})();
+</script>
+</body>
+</html>
