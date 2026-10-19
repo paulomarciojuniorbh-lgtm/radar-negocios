@@ -227,7 +227,7 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
   const $ = id => document.getElementById(id);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const n = v => (+v || 0).toLocaleString("pt-BR");
-  const SEG = { dentista: ["Dentistas", "clínica odontológica", 10], estetica: ["Estética", "clínica de estética", 10], pousada: ["Pousadas e hotéis", "pousada", 10], servicos_casa: ["Serviços para casa", "empresa", 9], oficina: ["Oficinas", "oficina", 6] };
+  const SEG = { dentista: ["Dentistas", "clínica odontológica", 10], estetica: ["Estética", "clínica de estética", 10], pousada: ["Pousadas e hotéis", "pousada", 10], servicos_casa: ["Serviços para casa", "empresa", 9], oficina: ["Oficinas", "oficina", 6], veterinario: ["Veterinários", "clínica veterinária", 9] };
   const SITE = { proprio: ["Site próprio", "ok"], instagram: ["Só Instagram", "hot"], whatsapp: ["Só WhatsApp", "hot"], facebook: ["Só Facebook", "hot"], link_bio: ["Link de bio", "hot"], nenhum: ["Sem site", "hot"], plataforma: ["Plataforma de terceiros", "mid"], delivery: ["App de delivery", "mid"], fora_do_ar: ["Site fora do ar", "hot"], governo: ["Órgão público", ""], rede: ["Rede ou franquia", ""] };
   const ST = { chamei: "Chamei", respondeu: "Respondeu", negociando: "Negociando", fechou: "Fechou", sem_interesse: "Sem interesse" };
   const fora = x => x.site_tipo === "governo" || x.site_tipo === "rede";
@@ -255,6 +255,7 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
     pousada: { min: 1800, max: 3000, men: 119, plano: "Site com reservas diretas", inclui: ["Galeria de quartos e da estrutura", "Pedido de reserva direto pelo WhatsApp ou formulário", "Como chegar e passeios da região", "Versão em inglês (opcional)", "Avaliações do Google na página"], ancora: "Cada reserva direta economiza de 15 a 20% de comissão que iria para o Booking ou o Airbnb." },
     solar: { min: 1800, max: 2800, men: 99, plano: "Site de captação de orçamentos", inclui: ["Simulador simples de economia na conta de luz", "Projetos entregues com fotos", "Formulário de orçamento direto no WhatsApp", "Página de financiamento", "Configuração para aparecer na busca local"], ancora: "Um único projeto fechado paga o site muitas vezes." },
     casa: { min: 1000, max: 1600, men: 69, plano: "Site de serviços", inclui: ["Página por serviço com fotos de trabalhos", "Botão de orçamento pelo WhatsApp", "Bairros atendidos", "Avaliações do Google na página", "Configuração para aparecer na busca local"], ancora: "Dois ou três orçamentos fechados pagam o site." },
+    veterinario: { min: 1200, max: 2000, men: 89, plano: "Site com agendamento", inclui: ["Agendamento de consulta, vacina, banho e tosa pelo WhatsApp", "Lembrete de vacina e vermífugo para o tutor", "Serviços, equipe e estrutura com fotos", "Plantão e emergência em destaque", "Avaliações do Google na página"], ancora: "Dois ou três pets fidelizados pagam o site." },
     oficina: { min: 700, max: 1200, men: 59, plano: "Site de oficina", inclui: ["Serviços e marcas atendidas", "Botão de orçamento pelo WhatsApp", "Fotos da oficina e da equipe", "Mapa, horário e avaliações do Google"], ancora: "Uma revisão completa ou dois serviços pagam o site." }
   };
   function preco(x) {
