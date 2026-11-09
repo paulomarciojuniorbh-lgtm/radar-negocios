@@ -160,6 +160,21 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
 .lotes{display:flex;gap:8px;flex-wrap:wrap;align-self:end}
 .lotes .btn{text-decoration:none}
 .chip.pil{background:var(--accent-soft);color:var(--accent)}
+.ctt{position:fixed;inset:0;z-index:20;background:var(--bg);overflow:auto}
+.ctt .in{max-width:1100px;margin:0 auto;padding:22px max(16px,env(safe-area-inset-left)) 60px}
+.ctt .topo{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}.ctt .topo h1{font-size:26px;margin:0}
+.ctt .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
+.ctt .tabs button{border:1px solid var(--line,#ddd);background:var(--card,#fff);border-radius:999px;padding:7px 13px;cursor:pointer;font:inherit;font-size:13.5px}
+.ctt .tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ct{border:1px solid var(--line,#ddd);background:var(--card,#fff);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.ct .h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.ct .h b{font-size:15.5px}.ct .meta{font-size:12.5px;color:var(--muted)}
+.ct .nota{font-size:13.5px;margin:8px 0 0;color:var(--muted)}
+.ct .sug{margin:10px 0 0;background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:13.5px;white-space:pre-wrap}
+.ct .ac{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.ct .ac .btn{font-size:13px;padding:7px 11px}
+.ct .sts{display:flex;gap:4px;flex-wrap:wrap}.ct .sts button{font:inherit;font-size:12px;border:1px solid var(--line,#ddd);background:none;border-radius:8px;padding:5px 9px;cursor:pointer}
+.ct .sts button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:9px;font-weight:600;z-index:30}
 </style>
 </head>
@@ -171,7 +186,7 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
       <h1>Radar Negócios Locais</h1>
       <p>Empresas que aparecem no Google Maps, com nota, avaliações, posição na busca, site e Instagram. O radar aponta quem tem clientes e boa reputação, mas ainda não tem um site próprio.</p>
     </div>
-    <nav class="lotes" aria-label="Lotes de pilotos"><a class="btn" href="lote1.html">Lote 1 · pilotos</a><a class="btn" href="lote2.html">Lote 2 · pilotos</a></nav>
+    <nav class="lotes" aria-label="Lotes de pilotos"><button class="btn pri" type="button" id="bContatos">Meus contatos</button><a class="btn" href="lote1.html">Lote 1 · pilotos</a><a class="btn" href="lote2.html">Lote 2 · pilotos</a></nav>
     <label class="cidade" for="fCidade">Cidade <select id="fCidade"></select></label>
   </header>
 
@@ -218,6 +233,7 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
     <span>Dados públicos das empresas no Google. Use para prospecção com bom senso: uma mensagem por empresa, sem insistência.</span>
   </footer>
 </div>
+<div id="contatos" hidden></div>
 <div id="detail" hidden></div>
 <div class="toast" id="toast" hidden></div>
 <script>
@@ -503,6 +519,66 @@ h1,h2,h3{font-family:var(--display);font-stretch:85%;margin:0;text-wrap:balance;
   $("more").onclick = () => { shown += 40; render(); };
   $("rows").onclick = e => { const b = e.target.closest(".row"); if (b) abrir(ALL.find(x => x.place_id === b.dataset.id)); };
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("detail").hidden) fechar(); });
+
+  /* ---------- Meus contatos: todos os abordados, de todas as cidades, com a próxima mensagem sugerida ---------- */
+  let CT_ABA = "acao";
+  const diasDe = d => d ? Math.floor((Date.now() - new Date(d)) / 864e5) : null;
+
+  function proximaMsg(x) {
+    const nm = nomeCurto(x), d = diasDe(x.ab_em), nota = (x.ab_nota || "").toLowerCase();
+    if (x.ab_status === "fechou") return { quando: "Acompanhar", texto: nota.includes("aguardando") ?
+      `Oi, Andréa! Tudo bem? Aqui é o Paulo, da Hélice.\n\nPassando pra saber se conseguiu ver os passos do piloto de gestão: o acesso de gerente no Google Meu Negócio (paulomarciojuniorbh@gmail.com) e o convite do Meta. Assim que liberar, já começo e te mostro tudo pelo painel.\n\nSe preferir, faço uma ligação rápida e a gente libera juntos em 5 minutos.` :
+      `Oi! Tudo bem? Aqui é o Paulo, da Hélice. Passando pra saber se está tudo certo com o site e se precisa de algum ajuste este mês.` };
+    if (x.ab_status === "negociando") return { quando: d >= 2 ? "Retomar hoje" : "Aguardar " + (2 - d) + " dia(s)", texto:
+      `Oi! Tudo bem? Aqui é o Paulo, da Hélice.\n\nPassando pra retomar nossa conversa sobre o site da ${nm}. Lembrando: não tem taxa de entrada e você só começa a pagar depois de ver o site no ar e aprovar.\n\nPosso seguir com a versão final pra você aprovar? Se preferir, te explico em uma ligação de 5 minutos.` };
+    if (x.ab_status === "respondeu") return { quando: d >= 2 ? "Retomar hoje" : "Aguardar " + (2 - d) + " dia(s)", texto:
+      (nota.includes("amostra") || nota.includes("piloto")) ?
+      `Oi! Tudo bem? Aqui é o Paulo, da Hélice.\n\nConseguiu dar uma olhada na amostra que preparei para a ${nm}? Se quiser, ajusto cores, fotos e textos do jeito de vocês, sem compromisso.\n\nPosso te mostrar em uma ligação rápida de 5 minutos?` :
+      `Oi! Tudo bem? Aqui é o Paulo, da Hélice.\n\nObrigado pelo retorno! Quer que eu prepare uma amostra do site da ${nm}, com a identidade de vocês? É sem compromisso: você só decide depois de ver.` };
+    if (x.ab_status === "chamei") {
+      const pos = x.pos_cidade ? `aparece em ${x.pos_cidade}º na busca do Google` : "não aparece na busca geral do Google na cidade";
+      const site = { nenhum: "o perfil de vocês não tem link de site", instagram: "o link do perfil leva só para o Instagram", whatsapp: "o link do perfil leva só para o WhatsApp", facebook: "o link do perfil leva só para o Facebook", link_bio: "o link do perfil leva para um link de bio", fora_do_ar: "o site cadastrado no Google está fora do ar" }[x.site_tipo] || "dá para melhorar a presença de vocês no Google";
+      return { quando: d >= 3 ? "Follow-up hoje" : "Aguardar " + (3 - d) + " dia(s)", texto:
+        `Oi! Tudo bem? Aqui é o Paulo, da Hélice.\n\nTomei a liberdade de fazer um Raio-X rápido da ${nm} no Google: nota ${x.rating ? x.rating.toLocaleString("pt-BR") : "–"} com ${n(x.avaliacoes)} avaliações, ${pos}, e ${site}.\n\nPosso te mandar a análise completa com os concorrentes da região? É grátis. E se fizer sentido, a gente conversa sobre melhorias pro negócio.` };
+    }
+    return { quando: "Não insistir", texto: d != null && d >= 90 ? `Oi! Tudo bem? Aqui é o Paulo, da Hélice. Faz um tempo que conversamos: posso te mandar um Raio-X atualizado da ${nm} no Google? É grátis.` : "" };
+  }
+  function abrirContatos() { $("contatos").hidden = false; document.body.style.overflow = "hidden"; drawContatos(); }
+  function fecharContatos() { $("contatos").hidden = true; document.body.style.overflow = ""; }
+  function drawContatos() {
+    const C = RAW.filter(x => x.ab_status);
+    const pr = x => { const q = proximaMsg(x).quando; return /hoje/.test(q) ? 0 : x.ab_status === "fechou" ? 1 : /Aguardar/.test(q) ? 2 : 3; };
+    const abas = [["acao", "Para fazer hoje", x => /hoje/.test(proximaMsg(x).quando)], ["fechou", "Clientes", x => x.ab_status === "fechou"], ["negociando", "Negociando", x => x.ab_status === "negociando"], ["respondeu", "Responderam", x => x.ab_status === "respondeu"], ["chamei", "Sem resposta", x => x.ab_status === "chamei"], ["sem_interesse", "Sem interesse", x => x.ab_status === "sem_interesse"], ["todos", "Todos", x => true]];
+    const f = abas.find(a => a[0] === CT_ABA)[2];
+    const L = C.filter(f).sort((a, b) => pr(a) - pr(b) || new Date(a.ab_em) - new Date(b.ab_em));
+    $("contatos").innerHTML = `<div class="ctt"><div class="in"><div class="topo"><h1>Meus contatos</h1><span class="meta">${C.length} empresas abordadas em ${new Set(C.map(x => x.cidade)).size} cidades</span><button class="btn" type="button" id="ctFechar" style="margin-left:auto">Voltar ao radar</button></div>
+      <p class="sub" style="margin:0;color:var(--muted)">Cada contato tem a próxima mensagem sugerida. Envie pelo WhatsApp e atualize o status aqui mesmo. Para não ser bloqueado: no máximo 10 a 15 envios por dia, com uns 6 minutos entre eles. Comece pelos que responderam e pelos que estão negociando.</p>
+      <div class="tabs">${abas.map(([k, t, fn]) => `<button type="button" data-ca="${k}" aria-pressed="${k === CT_ABA}">${t} · ${C.filter(fn).length}</button>`).join("")}</div>
+      ${L.length ? L.map(x => { const m = proximaMsg(x), d = diasDe(x.ab_em); let tel = String(x.telefone || "").replace(/\D/g, ""); if (tel && tel.length <= 11) tel = "55" + tel;
+        return `<div class="ct" data-id="${x.place_id}"><div class="h"><div><b>${esc(nomeCurto(x))}</b><div class="meta">${esc(x.cidade)} · ${esc((SEG[x.segmento] || [x.segmento])[0])} · ${esc(x.telefone || "sem telefone")} · ${d == null ? "" : d === 0 ? "atualizado hoje" : "há " + d + " dia(s)"}</div></div>
+          <div class="sts">${Object.entries(ST).map(([k, l]) => `<button type="button" data-st="${k}" aria-pressed="${x.ab_status === k}">${l}</button>`).join("")}</div></div>
+          ${x.ab_nota ? `<p class="nota">📝 ${esc(x.ab_nota)}</p>` : ""}
+          <p class="meta" style="margin:10px 0 0"><b>${esc(m.quando)}</b></p>${m.texto ? `<div class="sug">${esc(m.texto)}</div>` : ""}
+          <div class="ac">${m.texto && tel ? `<a class="btn zap" target="_blank" rel="noopener" href="https://wa.me/${tel}?text=${encodeURIComponent(m.texto)}" data-env="1">Enviar no WhatsApp</a>` : ""}${m.texto ? `<button class="btn" type="button" data-cp="1">Copiar</button>` : ""}<button class="btn" type="button" data-nota="1">Anotar</button><button class="btn" type="button" data-ficha="1">Ficha completa</button></div></div>`; }).join("") : `<div class="ct" style="text-align:center;color:var(--muted)">Nada por aqui.</div>`}
+    </div></div>`;
+    $("ctFechar").onclick = fecharContatos;
+    $("contatos").querySelectorAll("[data-ca]").forEach(b => b.onclick = () => { CT_ABA = b.dataset.ca; drawContatos(); $("contatos").querySelector(".ctt").scrollTop = 0; });
+    $("contatos").querySelectorAll(".ct[data-id]").forEach(el => {
+      const x = RAW.find(z => z.place_id === el.dataset.id), m = proximaMsg(x);
+      el.querySelectorAll("[data-st]").forEach(b => b.onclick = async () => { const st = b.dataset.st; let v = x.ab_valor;
+        if (st === "fechou") { const r = prompt("Valor mensal fechado (R$):", x.ab_valor || ""); if (r === null) return; v = r === "" ? null : +String(r).replace(",", "."); }
+        try { await rpc("neg_registrar", { p_token: TOKEN, p_place: x.place_id, p_status: st, p_nota: x.ab_nota || null, p_valor: st === "fechou" ? v : null, p_servico: x.ab_servico || null });
+          Object.assign(x, { ab_status: st, ab_valor: st === "fechou" ? v : null, ab_em: new Date().toISOString() }); toast(`Marcada como "${ST[st]}"`); drawContatos(); } catch (e) { toast("Não salvou: " + e.message); } });
+      const cp = el.querySelector("[data-cp]"); if (cp) cp.onclick = () => navigator.clipboard.writeText(m.texto).then(() => toast("Mensagem copiada"), () => toast("Não consegui copiar"));
+      const env = el.querySelector("[data-env]"); if (env) env.addEventListener("click", async () => { const hoje = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }); const nota = ((x.ab_nota || "") + `\n${hoje}: follow-up enviado (${m.quando.toLowerCase()})`).trim();
+        try { await rpc("neg_registrar", { p_token: TOKEN, p_place: x.place_id, p_status: x.ab_status, p_nota: nota, p_valor: x.ab_valor ?? null, p_servico: x.ab_servico || null }); Object.assign(x, { ab_nota: nota, ab_em: new Date().toISOString() }); setTimeout(drawContatos, 600); } catch (_) {} });
+      el.querySelector("[data-nota]").onclick = async () => { const t = prompt("Anotação (o que aconteceu, próximo passo):"); if (!t) return; const hoje = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }); const nota = ((x.ab_nota || "") + `\n${hoje}: ${t}`).trim();
+        try { await rpc("neg_registrar", { p_token: TOKEN, p_place: x.place_id, p_status: x.ab_status, p_nota: nota, p_valor: x.ab_valor ?? null, p_servico: x.ab_servico || null }); Object.assign(x, { ab_nota: nota, ab_em: new Date().toISOString() }); toast("Anotado"); drawContatos(); } catch (e) { toast("Não salvou: " + e.message); } };
+      el.querySelector("[data-ficha]").onclick = () => { fecharContatos(); if ($("fCidade").value !== x.cidade) { $("fCidade").value = x.cidade; porCidade(); tudo(); } abrir(ALL.find(z => z.place_id === x.place_id)); };
+    });
+  }
+  $("bContatos").onclick = () => { if (!RAW.length) { toast("Carregando dados…"); return; } abrirContatos(); };
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("contatos").hidden && $("detail").hidden) fecharContatos(); });
 
   function pedirChave(erro) {
     document.querySelector(".wrap").innerHTML = `<form class="login" id="fLogin"><h1 style="font-size:28px">Radar Negócios Locais</h1><p class="sub" style="margin:0;color:var(--muted)">Acesso restrito. Abra pelo link com a chave ou cole a chave abaixo.</p>${erro ? `<p style="margin:0;color:var(--hot);font-weight:600">${esc(erro)}</p>` : ""}<label for="kIn" style="font-weight:600;font-size:13px">Chave de acesso</label><input id="kIn" autocomplete="off" required><button class="btn pri" type="submit">Entrar</button></form>`;
